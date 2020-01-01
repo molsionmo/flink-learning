@@ -14,6 +14,7 @@ import org.apache.flink.cep.pattern.Pattern;
 import org.apache.flink.cep.pattern.conditions.SimpleCondition;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.util.Collector;
 
 import java.util.List;
@@ -31,36 +32,39 @@ public class CEPMain {
         env.getConfig().setGlobalJobParameters(parameterTool);
         env.setParallelism(1);
 
-        SingleOutputStreamOperator<Event> eventDataStream = env.socketTextStream("127.0.0.1", 9200)
-                .flatMap(new FlatMapFunction<String, Event>() {
-                    @Override
-                    public void flatMap(String s, Collector<Event> collector) throws Exception {
-                        if (StringUtil.isNotEmpty(s)) {
-                            String[] split = s.split(",");
-                            if (split.length == 2) {
-                                collector.collect(new Event(Integer.valueOf(split[0]), split[1]));
-                            }
-                        }
-                    }
-                });
+        SingleOutputStreamOperator<Event> eventDataStream = env.fromElements(
+                new Event(41, "start"),new Event(42, "start"), new Event(43,"start"));
+
+//        SingleOutputStreamOperator<Event> eventDataStream = env.socketTextStream("127.0.0.1", 9200)
+//                .flatMap(new FlatMapFunction<String, Event>() {
+//                    @Override
+//                    public void flatMap(String s, Collector<Event> collector) throws Exception {
+//                        if (StringUtil.isNotEmpty(s)) {
+//                            String[] split = s.split(",");
+//                            if (split.length == 2) {
+//                                collector.collect(new Event(Integer.valueOf(split[0]), split[1]));
+//                            }
+//                        }
+//                    }
+//                });
 
         //42,zhisheng
         //20,zhisheng
 
-        Pattern<Event, ?> pattern = Pattern.<Event>begin("start").where(
+        Pattern<Event, ?> pattern = Pattern.<Event>begin("start").times(2).where(
                 new SimpleCondition<Event>() {
                     @Override
                     public boolean filter(Event event) {
                         log.info("start {}", event.getId());
-                        return event.getId() == 42;
+                        return event.getName().equals("start");
                     }
                 }
-        ).next("middle").where(
+        ).next("middle").within(Time.seconds(1)).where(
                 new SimpleCondition<Event>() {
                     @Override
                     public boolean filter(Event event) {
                         log.info("middle {}", event.getId());
-                        return event.getId() >= 10;
+                        return event.getName().equals("middle");
                     }
                 }
         );
@@ -76,14 +80,14 @@ public class CEPMain {
             }
         }).print();
 
-        CEP.pattern(eventDataStream, pattern).flatSelect(new PatternFlatSelectFunction<Event, String>() {
-            @Override
-            public void flatSelect(Map<String, List<Event>> map, Collector<String> collector) throws Exception {
-                for (Map.Entry<String, List<Event>> entry : map.entrySet()) {
-                    collector.collect(entry.getKey() + " " + entry.getValue().get(0).getId() + "," + entry.getValue().get(0).getName());
-                }
-            }
-        }).print();
+//        CEP.pattern(eventDataStream, pattern).flatSelect(new PatternFlatSelectFunction<Event, String>() {
+//            @Override
+//            public void flatSelect(Map<String, List<Event>> map, Collector<String> collector) throws Exception {
+//                for (Map.Entry<String, List<Event>> entry : map.entrySet()) {
+//                    collector.collect(entry.getKey() + " " + entry.getValue().get(0).getId() + "," + entry.getValue().get(0).getName());
+//                }
+//            }
+//        }).print();
 
 
         env.execute("flink learning cep");

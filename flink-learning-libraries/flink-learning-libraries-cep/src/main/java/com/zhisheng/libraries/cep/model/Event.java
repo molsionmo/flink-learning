@@ -18,4 +18,5 @@ import lombok.NoArgsConstructor;
 public class Event {
     private Integer id;
     private String name;
+
 }
