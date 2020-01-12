@@ -48,8 +48,7 @@ public class CEPMain2 {
                                 return tuple3.f1.equals("exit");
                         }});
 
-        PatternStream<Tuple3<Integer, String, String>> patternStream =
-                CEP.pattern(eventStream.keyBy(x -> x.f0), loginFail);
+        PatternStream<Tuple3<Integer, String, String>> patternStream = CEP.pattern(eventStream.keyBy(x -> x.f0), loginFail);
         DataStream<String> alarmStream =
                 patternStream.select(new PatternSelectFunction<Tuple3<Integer, String, String>, String>() {
                     @Override

@@ -10,18 +10,21 @@ import org.apache.flink.cep.pattern.Pattern;
 import org.apache.flink.cep.pattern.conditions.SimpleCondition;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.util.Collector;
 
 import java.util.List;
 import java.util.Map;
 
 @Slf4j
-public class NotNextCEP {
+public class CEPTime {
     public static void main(String[] args) throws Exception {
+
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+//        env.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime);
 //        DataStream<Tuple3<Integer, String, String>> eventStream = env.fromElements(
 //                Tuple3.of(1500, "login", "success"),
-//                Tuple3.of(1500, "exit", "success"));
+//                Tuple3.of(1200, "exit", "success"));
 
         // 1500,login,success
         // 1500,exit,success
@@ -34,7 +37,12 @@ public class NotNextCEP {
             }
         });
 
-        // 登录成功10分钟后，没有投资
+
+        /**
+         * 登录成功5S后，没有投资,最后登录退出
+         * 1500,login,success; 1500,exit,success 将命中(10S内将命中,如果超过10S将不命中)
+         *
+         */
         Pattern<Tuple3<Integer,String,String>,?> pattern = Pattern.<Tuple3<Integer, String, String>>begin("begin")
                 .where(new SimpleCondition<Tuple3<Integer,String,String>>() {
                     @Override
@@ -42,8 +50,22 @@ public class NotNextCEP {
                         log.info("begin:{}", s);
                         return s.f1.equals("login") && s.f2.equals("success");
                     }
-                });
-
+                })
+                .notFollowedBy("notInvest").where(new SimpleCondition<Tuple3<Integer, String, String>>() {
+                    @Override
+                    public boolean filter(Tuple3<Integer, String, String> tuple3) throws Exception {
+                        log.info("notInvest:{}", tuple3);
+                        return tuple3.f1.equals("invest");
+                    }
+                })
+                .next("exit").where(new SimpleCondition<Tuple3<Integer, String, String>>() {
+                    @Override
+                    public boolean filter(Tuple3<Integer, String, String> tuple3) throws Exception {
+                        log.info("exit:{}", tuple3);
+                        return tuple3.f1.equals("exit");
+                    }
+                })
+                .within(Time.seconds(10));
         PatternStream<Tuple3<Integer, String, String>> patternStream = CEP.pattern(eventSocketStream.keyBy(x->x.f0), pattern);
 
         DataStream<String> alarmStream =
@@ -60,6 +82,6 @@ public class NotNextCEP {
 
         alarmStream.print();
 
-        env.execute("cep test");
+        env.execute("cep time test");
     }
 }
