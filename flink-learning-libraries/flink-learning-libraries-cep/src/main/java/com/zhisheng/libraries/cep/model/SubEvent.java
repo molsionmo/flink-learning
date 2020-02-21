@@ -12,9 +12,11 @@ import lombok.NoArgsConstructor;
  * 微信公众号：zhisheng
  */
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class SubEvent {
+public class SubEvent extends Event{
     private Integer volume;
+
+    public SubEvent(Integer id,String name, Integer volume){
+        super(id, name);
+        this.volume = volume;
+    }
 }

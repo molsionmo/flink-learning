@@ -1,9 +1,6 @@
 package com.zhisheng.libraries.cep.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 /**
  * Desc:
@@ -15,7 +12,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@ToString
 public class Event {
     private Integer id;
     private String name;
+
 }

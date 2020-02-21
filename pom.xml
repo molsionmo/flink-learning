@@ -34,6 +34,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <idea.version>2019.2.2</idea.version>
     </properties>
 
     <dependencies>
@@ -54,10 +55,15 @@
             <artifactId>slf4j-api</artifactId>
             <version>1.7.25</version>
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.slf4j</groupId>-->
+<!--            <artifactId>slf4j-simple</artifactId>-->
+<!--            <version>1.7.25</version>-->
+<!--        </dependency>-->
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>1.7.25</version>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.3</version>
         </dependency>
     </dependencies>
 
@@ -66,9 +72,10 @@
     <!-- Otherwise they are missing in IntelliJ, because the dependency is 'provided' -->
     <profiles>
         <profile>
-            <id>add-dependencies-for-IDEA</id>
-
+            <id>dev</id>
+            <!-- <id>add-dependencies-for-IDEA</id>-->
             <activation>
+                <activeByDefault>true</activeByDefault>
                 <property>
                     <name>idea.version</name>
                 </property>
@@ -82,6 +89,13 @@
                     <scope>compile</scope>
                 </dependency>
             </dependencies>
+        </profile>
+
+        <profile>
+            <id>release</id>
+            <properties>
+                <profile.active>release</profile.active>
+            </properties>
         </profile>
     </profiles>
 </project>
