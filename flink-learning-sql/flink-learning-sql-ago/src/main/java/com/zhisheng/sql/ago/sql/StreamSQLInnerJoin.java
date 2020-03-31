@@ -14,10 +14,8 @@ import org.apache.flink.table.api.java.StreamTableEnvironment;
 import java.util.Arrays;
 
 /**
- * Desc: Convert DataStreams to Tables
- * Created by zhisheng on 2019-06-02
- * blog：http://www.54tianzhisheng.cn/
- * 微信公众号：zhisheng
+ * @author mxb
+ * @since 2020-03-30
  */
 public class StreamSQLInnerJoin {
     public static void main(String[] args) throws Exception {

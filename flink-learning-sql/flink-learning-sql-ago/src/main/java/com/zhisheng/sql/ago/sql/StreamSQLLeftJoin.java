@@ -16,6 +16,8 @@ import org.apache.flink.table.api.java.StreamTableEnvironment;
 import java.util.Arrays;
 
 /**
+ * @author mxb
+ * @since 2020-03-30
  */
 public class StreamSQLLeftJoin {
     public static void main(String[] args) throws Exception {
